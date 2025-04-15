@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Chat</title>
+  <title>Project A Chat</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark-dimmed.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">
   <style>
     :root {
       color-scheme: dark;
@@ -39,7 +39,6 @@
     }
 
     .message {
-      position: relative;
       padding: 12px 16px;
       border-radius: 8px;
       max-width: 100%;
@@ -94,73 +93,24 @@
       background-color: #0e8b6f;
     }
 
+    pre {
+      background: none;
+      padding: 0;
+      margin: 0;
+    }
+
     code {
       font-family: 'Courier New', monospace;
-      background-color: #2f2f38;
-      padding: 12px;
+      background-color: #202123;
+      padding: 4px 6px;
+      border-radius: 4px;
       display: block;
-      border-radius: 6px;
-      overflow-x: auto;
-      white-space: pre;
-      margin-bottom: 1em;
-      position: relative;
-    }
-
-    .copy-btn {
-      position: absolute;
-      background-color: #3e3f4b;
-      border: none;
-      color: white;
-      padding: 4px 8px;
-      font-size: 0.8rem;
-      border-radius: 4px;
-      cursor: pointer;
-      opacity: 0.7;
-    }
-
-    .copy-btn:hover {
-      opacity: 1;
-    }
-
-    .copy-btn.bottom-right {
-      bottom: 8px;
-      right: 8px;
-    }
-
-    .copy-btn.top-right {
-      top: 8px;
-      right: 8px;
-    }
-
-    .assistant .copy-answer-btn {
-      background-color: #3e3f4b;
-      border: none;
-      color: white;
-      padding: 4px 8px;
-      font-size: 0.8rem;
-      border-radius: 4px;
-      cursor: pointer;
-      opacity: 0.7;
-      position: absolute;
-    }
-
-    .assistant .copy-answer-btn:hover {
-      opacity: 1;
-    }
-
-    .assistant .copy-answer-btn.bottom-right {
-      bottom: 8px;
-      right: 8px;
-    }
-
-    .assistant .copy-answer-btn.top-right {
-      top: 8px;
-      right: 8px;
+      white-space: pre-wrap;
     }
   </style>
 </head>
 <body>
-  <h1>AI Chat</h1>
+  <h1>Project A Chat</h1>
   <div id="chat-container"></div>
 
   <form id="chat-form">
@@ -170,7 +120,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-
   <script>
     const chatContainer = document.getElementById('chat-container');
     const chatForm = document.getElementById('chat-form');
@@ -180,7 +129,7 @@
 
     function renderMessages() {
       chatContainer.innerHTML = '';
-      messages.forEach((msg, idx) => {
+      messages.forEach(msg => {
         const div = document.createElement('div');
         div.className = `message ${msg.role}`;
 
@@ -194,62 +143,15 @@
         }
 
         div.innerHTML = content;
-
-        // Append to chat
         chatContainer.appendChild(div);
-
-        // Highlight code blocks and add copy buttons
-        div.querySelectorAll('pre code').forEach(codeBlock => {
-          hljs.highlightElement(codeBlock);
-          const parent = codeBlock.parentElement;
-          parent.style.position = 'relative';
-
-          // Bottom-right copy button
-          const copyBtnBR = document.createElement('button');
-          copyBtnBR.textContent = 'Copy';
-          copyBtnBR.className = 'copy-btn bottom-right';
-          copyBtnBR.onclick = () => copyCode(codeBlock, copyBtnBR);
-          parent.appendChild(copyBtnBR);
-
-          // Top-right copy button
-          const copyBtnTR = document.createElement('button');
-          copyBtnTR.textContent = 'Copy';
-          copyBtnTR.className = 'copy-btn top-right';
-          copyBtnTR.onclick = () => copyCode(codeBlock, copyBtnTR);
-          parent.appendChild(copyBtnTR);
-        });
-
-        // Add full message copy buttons for assistant replies
-        if (msg.role === 'assistant') {
-          const copyBtnTop = document.createElement('button');
-          copyBtnTop.textContent = 'Copy All';
-          copyBtnTop.className = 'copy-answer-btn top-right';
-          copyBtnTop.onclick = () => copyAll(msg.content, copyBtnTop);
-
-          const copyBtnBottom = document.createElement('button');
-          copyBtnBottom.textContent = 'Copy All';
-          copyBtnBottom.className = 'copy-answer-btn bottom-right';
-          copyBtnBottom.onclick = () => copyAll(msg.content, copyBtnBottom);
-
-          div.appendChild(copyBtnTop);
-          div.appendChild(copyBtnBottom);
-        }
       });
 
+      // Auto-scroll to bottom
       chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
 
-    function copyCode(codeBlock, button) {
-      navigator.clipboard.writeText(codeBlock.innerText).then(() => {
-        button.textContent = 'Copied!';
-        setTimeout(() => button.textContent = 'Copy', 1500);
-      });
-    }
-
-    function copyAll(text, button) {
-      navigator.clipboard.writeText(text).then(() => {
-        button.textContent = 'Copied!';
-        setTimeout(() => button.textContent = 'Copy All', 1500);
+      // Highlight code
+      document.querySelectorAll('pre code').forEach(block => {
+        hljs.highlightBlock(block);
       });
     }
 
@@ -276,4 +178,12 @@
         } else {
           messages.push({ role: 'assistant', content: '⚠️ No response received.' });
         }
-      } catch (err
+      } catch (err) {
+        messages.push({ role: 'assistant', content: '⚠️ Error connecting to server.' });
+      }
+
+      renderMessages();
+    });
+  </script>
+</body>
+</html>
