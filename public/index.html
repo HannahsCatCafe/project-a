@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Project A Assistant</title>
+</head>
+<body>
+  <h1>Ask Project A Something</h1>
+  <form id="chat-form">
+    <input type="text" id="prompt" placeholder="Enter prompt..." required>
+    <button type="submit">Send</button>
+  </form>
+  <pre id="response"></pre>
+
+  <script>
+    document.getElementById('chat-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const prompt = document.getElementById('prompt').value;
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      document.getElementById('response').textContent = data.reply || data.error;
+    });
+  </script>
+</body>
+</html>
