@@ -1,27 +1,188 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>My Project A Assistant</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project A Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #343541;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin-top: 20px;
+      font-weight: 600;
+    }
+
+    #chat-container {
+      width: 100%;
+      max-width: 800px;
+      padding: 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message {
+      padding: 12px 16px;
+      border-radius: 8px;
+      max-width: 100%;
+      white-space: pre-wrap;
+      line-height: 1.6;
+    }
+
+    .user {
+      background-color: #2e2f3a;
+      align-self: flex-end;
+    }
+
+    .assistant {
+      background-color: #444654;
+      align-self: flex-start;
+    }
+
+    #chat-form {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      padding: 10px 20px 30px;
+      box-sizing: border-box;
+    }
+
+    #prompt {
+      resize: vertical;
+      min-height: 60px;
+      max-height: 300px;
+      padding: 12px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      background-color: #40414f;
+      color: white;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 1rem;
+      background-color: #10a37f;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0e8b6f;
+    }
+
+    pre {
+      background: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    code {
+      font-family: 'Courier New', monospace;
+      background-color: #202123;
+      padding: 4px 6px;
+      border-radius: 4px;
+      display: block;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
 <body>
-  <h1>Ask Project A Something</h1>
+  <h1>AI Chat</h1>
+  <div id="chat-container"></div>
+
   <form id="chat-form">
-    <input type="text" id="prompt" placeholder="Enter prompt..." required>
+    <textarea id="prompt" placeholder="Type your question..." required></textarea>
     <button type="submit">Send</button>
   </form>
-  <pre id="response"></pre>
 
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
   <script>
-    document.getElementById('chat-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const prompt = document.getElementById('prompt').value;
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ prompt })
+    const chatContainer = document.getElementById('chat-container');
+    const chatForm = document.getElementById('chat-form');
+    const promptInput = document.getElementById('prompt');
+
+    const messages = [];
+
+    function renderMessages() {
+      chatContainer.innerHTML = '';
+      messages.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = `message ${msg.role}`;
+
+        let content = msg.content;
+
+        if (msg.role === 'assistant') {
+          // Render markdown with code highlighting
+          content = marked.parse(content);
+        } else {
+          content = content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        div.innerHTML = content;
+        chatContainer.appendChild(div);
       });
-      const data = await res.json();
-      document.getElementById('response').textContent = data.reply || data.error;
+
+      // Auto-scroll to bottom
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      // Highlight code
+      document.querySelectorAll('pre code').forEach(block => {
+        hljs.highlightBlock(block);
+      });
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const prompt = promptInput.value.trim();
+      if (!prompt) return;
+
+      messages.push({ role: 'user', content: prompt });
+      renderMessages();
+      promptInput.value = '';
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+
+        const data = await res.json();
+        if (data.reply) {
+          messages.push({ role: 'assistant', content: data.reply });
+        } else {
+          messages.push({ role: 'assistant', content: '⚠️ No response received.' });
+        }
+      } catch (err) {
+        messages.push({ role: 'assistant', content: '⚠️ Error connecting to server.' });
+      }
+
+      renderMessages();
     });
   </script>
 </body>
