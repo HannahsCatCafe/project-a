@@ -10,179 +10,330 @@
     :root {
       color-scheme: dark;
     }
-
     body {
       margin: 0;
       padding: 0;
       font-family: 'Inter', sans-serif;
-      background-color: #343541;
+      background: linear-gradient(135deg, #343541 0%, #202123 100%);
       color: #fff;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
+      height: 100vh;
     }
-
     h1 {
-      margin-top: 20px;
-      font-weight: 600;
+      margin: 24px 0 0 0;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 1px;
+      color: #ececf1;
+      font-size: 2rem;
     }
-
     #chat-container {
+      flex: 1 1 auto;
       width: 100%;
-      max-width: 800px;
-      padding: 20px;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 24px 0 120px 0;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+    .message-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+    }
+    .message {
+      padding: 16px 20px;
+      border-radius: 18px;
+      max-width: 75%;
+      white-space: pre-wrap;
+      line-height: 1.7;
+      font-size: 1.08rem;
+      box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08);
+      position: relative;
+      word-break: break-word;
+    }
+    .user-row {
+      flex-direction: row-reverse;
+    }
+    .user {
+      background: #10a37f;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .assistant {
+      background: #444654;
+      color: #ececf1;
+      border-bottom-left-radius: 4px;
+    }
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #202123;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #fff;
+      box-shadow: 0 1px 4px 0 rgba(0,0,0,0.10);
+      user-select: none;
+    }
+    .user-avatar {
+      background: #10a37f;
+    }
+    .assistant-avatar {
+      background: #444654;
+    }
+    .timestamp {
+      font-size: 0.8rem;
+      color: #b4b4b8;
+      margin-top: 4px;
+      text-align: right;
+    }
+    #chat-form {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      background: linear-gradient(0deg, #343541 90%, #34354100 100%);
+      display: flex;
+      justify-content: center;
+      padding: 18px 0 18px 0;
+      z-index: 10;
+      box-shadow: 0 -2px 16px 0 rgba(0,0,0,0.10);
+    }
+    #form-inner {
+      width: 100%;
+      max-width: 700px;
+      display: flex;
+      align-items: flex-end;
       gap: 10px;
     }
-
-    .message {
-      padding: 12px 16px;
-      border-radius: 8px;
-      max-width: 100%;
-      white-space: pre-wrap;
-      line-height: 1.6;
-    }
-
-    .user {
-      background-color: #2e2f3a;
-      align-self: flex-end;
-    }
-
-    .assistant {
-      background-color: #444654;
-      align-self: flex-start;
-    }
-
-    #chat-form {
-      width: 100%;
-      max-width: 800px;
-      display: flex;
-      flex-direction: column;
-      padding: 10px 20px 30px;
-      box-sizing: border-box;
-    }
-
     #prompt {
-      resize: vertical;
-      min-height: 60px;
-      max-height: 300px;
-      padding: 12px;
+      resize: none;
+      min-height: 48px;
+      max-height: 180px;
+      padding: 14px 12px;
       font-size: 1rem;
-      border-radius: 8px;
+      border-radius: 10px;
       border: none;
       outline: none;
       background-color: #40414f;
       color: white;
+      flex: 1 1 auto;
+      box-shadow: 0 1px 4px 0 rgba(0,0,0,0.10);
+      transition: box-shadow 0.2s;
     }
-
-    button {
-      margin-top: 10px;
-      padding: 10px;
-      font-size: 1rem;
+    #prompt:focus {
+      box-shadow: 0 2px 8px 0 #10a37f44;
+    }
+    #send-btn, #mic-btn {
+      padding: 0 18px;
+      height: 48px;
+      font-size: 1.2rem;
       background-color: #10a37f;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
     }
-
-    button:hover {
+    #send-btn:hover, #mic-btn:hover {
       background-color: #0e8b6f;
     }
-
-    pre {
-      background: none;
-      padding: 0;
-      margin: 0;
+    #mic-btn {
+      background: #444654;
+      margin-right: 2px;
+      font-size: 1.3rem;
+      color: #fff;
+      border: 2px solid #10a37f;
+      transition: background 0.2s, color 0.2s;
     }
-
-    code {
-      font-family: 'Courier New', monospace;
-      background-color: #202123;
-      padding: 4px 6px;
-      border-radius: 4px;
-      display: block;
-      white-space: pre-wrap;
+    #mic-btn.listening {
+      background: #10a37f;
+      color: #fff;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 #10a37f44; }
+      70% { box-shadow: 0 0 0 10px #10a37f11; }
+      100% { box-shadow: 0 0 0 0 #10a37f44; }
+    }
+    .loading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #b4b4b8;
+      font-size: 1rem;
+      margin-left: 48px;
+    }
+    @media (max-width: 800px) {
+      #chat-container, #form-inner {
+        max-width: 100vw;
+        padding: 0 8px;
+      }
     }
   </style>
 </head>
 <body>
   <h1>Project A Chat</h1>
   <div id="chat-container"></div>
-
-  <form id="chat-form">
-    <textarea id="prompt" placeholder="Type your question..." required></textarea>
-    <button type="submit">Send</button>
+  <form id="chat-form" autocomplete="off">
+    <div id="form-inner">
+      <button type="button" id="mic-btn" title="Speak" aria-label="Voice input">3A4</button>
+      <textarea id="prompt" placeholder="Type your question..." required autocomplete="off"></textarea>
+      <button type="submit" id="send-btn" aria-label="Send">7A4</button>
+    </div>
   </form>
-
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
   <script>
     const chatContainer = document.getElementById('chat-container');
     const chatForm = document.getElementById('chat-form');
     const promptInput = document.getElementById('prompt');
-
+    const micBtn = document.getElementById('mic-btn');
+    const sendBtn = document.getElementById('send-btn');
+    let isLoading = false;
+    let recognition;
+    let isListening = false;
     const messages = [];
-
+    function formatTime(date) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
     function renderMessages() {
       chatContainer.innerHTML = '';
       messages.forEach(msg => {
-        const div = document.createElement('div');
-        div.className = `message ${msg.role}`;
-
+        const row = document.createElement('div');
+        row.className = 'message-row ' + (msg.role === 'user' ? 'user-row' : '');
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar ' + (msg.role === 'user' ? 'user-avatar' : 'assistant-avatar');
+        avatar.textContent = msg.role === 'user' ? '🧑' : '🤖';
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'message ' + msg.role;
         let content = msg.content;
-
         if (msg.role === 'assistant') {
-          // Render markdown with code highlighting
           content = marked.parse(content);
         } else {
           content = content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
-
-        div.innerHTML = content;
-        chatContainer.appendChild(div);
+        msgDiv.innerHTML = content;
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'timestamp';
+        timeDiv.textContent = formatTime(new Date(msg.timestamp));
+        msgDiv.appendChild(timeDiv);
+        row.appendChild(avatar);
+        row.appendChild(msgDiv);
+        chatContainer.appendChild(row);
       });
-
-      // Auto-scroll to bottom
+      if (isLoading) {
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'loading';
+        loadingDiv.innerHTML = '<span class="avatar assistant-avatar">🤖</span> <span>Assistant is typing...</span>';
+        chatContainer.appendChild(loadingDiv);
+      }
       chatContainer.scrollTop = chatContainer.scrollHeight;
-
-      // Highlight code
       document.querySelectorAll('pre code').forEach(block => {
         hljs.highlightBlock(block);
       });
     }
-
+    function setLoading(state) {
+      isLoading = state;
+      renderMessages();
+    }
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-
       const prompt = promptInput.value.trim();
-      if (!prompt) return;
-
-      messages.push({ role: 'user', content: prompt });
+      if (!prompt || isLoading) return;
+      messages.push({ role: 'user', content: prompt, timestamp: Date.now() });
       renderMessages();
       promptInput.value = '';
-
+      setLoading(true);
       try {
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt })
         });
-
         const data = await res.json();
         if (data.reply) {
-          messages.push({ role: 'assistant', content: data.reply });
+          messages.push({ role: 'assistant', content: data.reply, timestamp: Date.now() });
         } else {
-          messages.push({ role: 'assistant', content: '⚠️ No response received.' });
+          messages.push({ role: 'assistant', content: '⚠️ No response received.', timestamp: Date.now() });
         }
       } catch (err) {
-        messages.push({ role: 'assistant', content: '⚠️ Error connecting to server.' });
+        messages.push({ role: 'assistant', content: '⚠️ Error connecting to server.', timestamp: Date.now() });
       }
-
-      renderMessages();
+      setLoading(false);
+    });
+    // Voice input using Web Speech API
+    function setupSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        micBtn.disabled = true;
+        micBtn.title = 'Voice input not supported in this browser.';
+        return;
+      }
+      recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      recognition.onstart = () => {
+        isListening = true;
+        micBtn.classList.add('listening');
+        micBtn.title = 'Listening... Click to stop.';
+      };
+      recognition.onend = () => {
+        isListening = false;
+        micBtn.classList.remove('listening');
+        micBtn.title = 'Speak';
+      };
+      recognition.onerror = (event) => {
+        isListening = false;
+        micBtn.classList.remove('listening');
+        micBtn.title = 'Speak';
+        alert('Voice input error: ' + event.error);
+      };
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        promptInput.value = transcript;
+        promptInput.focus();
+      };
+    }
+    micBtn.addEventListener('click', () => {
+      if (!recognition) return;
+      if (isListening) {
+        recognition.stop();
+      } else {
+        recognition.start();
+      }
+    });
+    // Auto-focus and auto-resize
+    function autoResizeTextarea() {
+      promptInput.style.height = 'auto';
+      promptInput.style.height = (promptInput.scrollHeight) + 'px';
+    }
+    promptInput.addEventListener('input', autoResizeTextarea);
+    window.addEventListener('load', () => {
+      promptInput.focus();
+      autoResizeTextarea();
+      setupSpeechRecognition();
+    });
+    // Enter to send, Shift+Enter for newline
+    promptInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendBtn.click();
+      }
     });
   </script>
 </body>
