@@ -2,7 +2,6 @@ const express = require('express');
 const axios = require('axios');
 const dotenv = require('dotenv');
 const path = require('path');
-const { AbortController } = require('abort-controller');
 
 dotenv.config();
 const app = express();
